@@ -125,9 +125,34 @@ class Rescuer(AbstractAgent):
                 path_final.append(pos)
 
         #adiciona ao plano
+        custo = 0 
+        plan_aux1 = list()
+        plan_aux2 = list()
+        plan_final = list()
         for i, pos in enumerate (path_final):
-            if i != len(path_final)-1:
-                self.plan.append((path_final[i+1][0]-pos[0],path_final[i+1][1]-pos[1]))
+            if i != len(path_final)-1 or custo + 3 >=  self.rtime:
+                mov = (path_final[i+1][0]-pos[0],path_final[i+1][1]-pos[1])
+                dx, dy = mov
+                if dx != 0 and dy != 0:
+                    self.rtime -= self.COST_DIAG
+                    custo += self.COST_DIAG
+                else:
+                    self.rtime -= self.COST_LINE
+                    custo+=self.COST_LINE
+                plan_aux1.append(mov)
+
+        plan_aux2 = plan_aux1.copy()
+        plan_aux1.reverse()
+        for i, mov in enumerate(plan_aux1):
+            plan_aux1[i] = (mov[0]*-1, mov[1]*-1)
+
+        print(plan_aux1, "--------------", plan_aux2)
+        plan_final =  plan_aux2 +  plan_aux1 
+
+        for mov in plan_final:
+            self.plan.append(mov)
+
+
 
     
         
