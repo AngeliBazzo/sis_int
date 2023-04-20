@@ -26,33 +26,110 @@ class Rescuer(AbstractAgent):
         # It changes to ACTIVE when the map arrives
         self.body.set_state(PhysAgent.IDLE)
 
-        # planning
-        self.__planner()
     
-    def go_save_victims(self, walls, victims):
+    def go_save_victims(self, mapa, victims):
         """ The explorer sends the map containing the walls and
         victims' location. The rescuer becomes ACTIVE. From now,
         the deliberate method is called by the environment"""
+        self.mapa = mapa
+        self.victims = victims
         self.body.set_state(PhysAgent.ACTIVE)
+
+        # planning
+        self.__planner()
         
+    def optimizePath(self, path):
+        return path
     
     def __planner(self):
         """ A private method that calculates the walk actions to rescue the
         victims. Further actions may be necessary and should be added in the
         deliberata method"""
+        
+        #calcula a prioridade de cada vitima
+        orderly_victims = list()
+        for victim in self.victims:
+            self.mapa[victim]["prioridade"] = self.mapa[victim]["custo"]/ self.mapa[victim]["gravidade"]
 
-        # This is a off-line trajectory plan, each element of the list is
-        # a pair dx, dy that do the agent walk in the x-axis and/or y-axis
-        self.plan.append((0,1))
-        self.plan.append((1,1))
-        self.plan.append((1,0))
-        self.plan.append((1,-1))
-        self.plan.append((0,-1))
-        self.plan.append((-1,0))
-        self.plan.append((-1,-1))
-        self.plan.append((-1,-1))
-        self.plan.append((-1,1))
-        self.plan.append((1,1))
+        orderly_victims = sorted(self.victims, key=lambda victim: self.mapa[victim]["prioridade"])
+
+        #checa se esta ordenada
+        '''for victim in orderly_victims:
+            print(self.mapa[victim]["prioridade"])'''
+
+        #lista os caminhos feitos pelo explorador ate a vitima 
+        list_orig_paths = list()
+        for victim in orderly_victims:
+            path = list()
+            pos = victim
+
+            if pos != (0,0):
+                in_start = False
+            else:
+                in_start = True
+            while in_start == False:
+                pos_pai = self.mapa[pos]["pos_anterior"]
+                path.insert(0, pos)
+                pos = pos_pai
+                if pos != (0,0):
+                    in_start = False
+                else:
+                    path.insert(0, pos)
+                    in_start = True
+            list_orig_paths.append(path)
+        #print(list_orig_paths)   
+
+        print(list_orig_paths)
+        list_orig_paths.reverse()
+        for i, path in enumerate(list_orig_paths):
+            if i != len(list_orig_paths)-1:
+                found = False
+                final_1 = list_orig_paths[i+1][len(list_orig_paths[i+1])-1]
+                k=-1
+                path_aux = list()
+                while not found:
+                    for j, element in enumerate(path):
+                        if found == True:
+                            break 
+                        if element == final_1:
+                            found = True
+                            #remove a parte anterior da lista
+                            del path[:j+1]
+                    #se nao encontrou
+                    if not found:
+                        k-=1
+                        path_aux.append(list_orig_paths[i+1][len(list_orig_paths[i+1])+k])
+                        for j, element in enumerate(path):
+                            if element == path_aux[len(path_aux)-1]:
+                                found = True
+                                #remove a parte anterior da lista
+                                del path[:j+1]
+                                print('---------------------------------------')
+                                print(path_aux)
+                                print(path)
+                                list_orig_paths[i] = path_aux + path
+                                print(list_orig_paths[i])
+                                print('---------------------------------------')
+                                
+        
+
+        list_orig_paths.reverse()
+        print(list_orig_paths)
+
+        #otimiza os caminhos
+
+        #concatena os caminhos
+        path_final = list()
+        for path in list_orig_paths:
+            for pos in path:
+                path_final.append(pos)
+
+        #adiciona ao plano
+        for i, pos in enumerate (path_final):
+            if i != len(path_final)-1:
+                self.plan.append((path_final[i+1][0]-pos[0],path_final[i+1][1]-pos[1]))
+
+    
         
     def deliberate(self) -> bool:
         """ This is the choice of the next action. The simulator calls this

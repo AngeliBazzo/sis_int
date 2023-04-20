@@ -37,12 +37,14 @@ class Explorer(AbstractAgent):
 
         self.mapa[self.pos_agent] = dados 
 
+        self.victim = list()
+
     def decidesMove(self, voltar):
         #movimentos possiveis
         poss_movs = [(0,-1),(0,1),(1,0),(-1,0),(1,-1),(1,1),(-1,-1),(-1,1)]
         aux = [(0,-1),(0,1),(1,0),(-1,0),(1,-1),(1,1),(-1,-1),(-1,1)]
         x_agent, y_agent= self.pos_agent
-        print("--------------------------------------------")
+        #print("--------------------------------------------")
         #checa se o movimento leva a uma posicao ja visitada
 
         for mov in poss_movs:
@@ -71,7 +73,7 @@ class Explorer(AbstractAgent):
             # time to wake up the rescuer
             # pass the walls and the victims (here, they're empty)
             print(f"{self.NAME} I believe I've remaining time of {self.rtime:.1f}")
-            self.resc.go_save_victims([],[])
+            self.resc.go_save_victims(self.mapa, self.victim)
             return False
         
         #checa se e preciso comecar a voltar ou nao
@@ -122,24 +124,30 @@ class Explorer(AbstractAgent):
                 #encontrou uma vitima
                 if seq >= 0:
                     tipo = 2
+                    #adiciona a vitima na lista de vitimas
+                    self.victim.append(new_position)
 
                     if self.rtime >= custo + self.COST_READ:
                         vs = self.body.read_vital_signals(seq)
                         self.rtime -= self.COST_READ
-                        print(vs)
+                        #print("aquiiiiiiiiiiiiiiiiiiiiiiii", vs)
+                        vit_grav =int(vs[7])
+                    
                     # print("exp: read vital signals of " + str(seq))
                     # print(vs)
 
                 #nao encontrou nada
                 else:
                      tipo = 0
+                     vit_grav = 0
 
                 #atualiza o mapa 
                 dados = dict()
                 dados["pos_anterior"] = self.pos_agent
                 dados["custo"] = custo
                 dados["tipo"] = tipo   # 0 normal, 1 parede, 2 vitima
-                
+                dados["gravidade"] = vit_grav
+
                 self.mapa[new_position] = dados
                 #atualiza a posicao 
                 self.pos_agent = new_position
