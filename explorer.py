@@ -126,7 +126,7 @@ class Explorer(AbstractAgent):
                     tipo = 2
                     #adiciona a vitima na lista de vitimas
                     self.victim.append(new_position)
-
+                    vit_grav =int(4)
                     if self.rtime >= custo + self.COST_READ:
                         vs = self.body.read_vital_signals(seq)
                         self.rtime -= self.COST_READ

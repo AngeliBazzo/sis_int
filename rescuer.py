@@ -79,7 +79,7 @@ class Rescuer(AbstractAgent):
             list_orig_paths.append(path)
         #print(list_orig_paths)   
 
-        print(list_orig_paths)
+        #print(list_orig_paths)
         list_orig_paths.reverse()
         for i, path in enumerate(list_orig_paths):
             if i != len(list_orig_paths)-1:
@@ -104,17 +104,17 @@ class Rescuer(AbstractAgent):
                                 found = True
                                 #remove a parte anterior da lista
                                 del path[:j+1]
-                                print('---------------------------------------')
+                                '''print('---------------------------------------')
                                 print(path_aux)
                                 print(path)
                                 list_orig_paths[i] = path_aux + path
                                 print(list_orig_paths[i])
-                                print('---------------------------------------')
+                                print('---------------------------------------')'''
                                 
         
 
         list_orig_paths.reverse()
-        print(list_orig_paths)
+        #print(list_orig_paths)
 
         #otimiza os caminhos
 
@@ -130,7 +130,7 @@ class Rescuer(AbstractAgent):
         plan_aux2 = list()
         plan_final = list()
         for i, pos in enumerate (path_final):
-            if i != len(path_final)-1 or custo + 3 >=  self.rtime:
+            if ( i != len(path_final)-1 and custo <=  self.rtime /2):
                 mov = (path_final[i+1][0]-pos[0],path_final[i+1][1]-pos[1])
                 dx, dy = mov
                 if dx != 0 and dy != 0:
@@ -145,8 +145,8 @@ class Rescuer(AbstractAgent):
         plan_aux1.reverse()
         for i, mov in enumerate(plan_aux1):
             plan_aux1[i] = (mov[0]*-1, mov[1]*-1)
-
-        print(plan_aux1, "--------------", plan_aux2)
+        print("custo+++++>", custo)
+        #print(plan_aux1, "--------------", plan_aux2)
         plan_final =  plan_aux2 +  plan_aux1 
 
         for mov in plan_final:
